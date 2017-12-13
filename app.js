@@ -119,6 +119,7 @@ http.createServer(function(request, response) {
   var ip = request.headers['x-real-ip'] || request.connection.remoteAddress;
   var path = xrl.parse(request.url).path;
   var url = xrl.parse(request.url).pathname || "/";
+  var search = xrl.parse(request.url).search || "";
   var params = xrl.parse(request.url).query || "";
   var host = request.headers['host'] || "";
   var method = request.method;
@@ -151,13 +152,13 @@ http.createServer(function(request, response) {
     }
     //host in list and rewrited
     else {
-      sloc = newloc.rewrite('$1',url);
+      sloc = newloc.rewrite('$1',url+search);
       console.log(ip + "," + request.method + "," + host+url +",301,"+sloc);
       response.writeHead(301,{'Location':idn.toASCII(sloc), 'Expires': (new Date).toGMTString()});
       response.end();
     }
   }
-  // info url 
+  // info url
   else if (url == config.infourl){
     oldhost = params || "";
     oldloc = idn.toUnicode(oldhost);
@@ -198,7 +199,7 @@ http.createServer(function(request, response) {
     }
     //host in list and rewrited
     else {
-      sloc=newloc.replace('$1',url);
+      sloc=newloc.replace('$1',url+search);
       console.log(ip + "," + request.method + "," + host+url +",301,"+sloc);
       response.writeHead(301,{'Location':idn.toASCII(sloc), 'Expires': (new Date).toGMTString()});
       response.end();

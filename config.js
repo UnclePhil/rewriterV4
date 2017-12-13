@@ -1,11 +1,11 @@
 module.exports = {
   blacklistfile:'/srv/rewriter/blacklist/iplist',
   filespath: '/srv/rewriter/rules/',
+  ipsrv : "127.0.0.1"
   port : 8080,
   resturl : '/rwconfx',
   testurl : '/rwtst',
   infourl : '/rwinfo',
-
   msg :{
     ErrorHeader : "Url Rewriter V4\nIt seems that we have a problem\nPlease contact our Helpdesk\n",
     IpNotAllowed : "is not allowed to use this proxy",
