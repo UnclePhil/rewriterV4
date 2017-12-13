@@ -1,7 +1,6 @@
-Rewriter
-========
-Version 4.0 : 2016/11/18
------------ 
+# Rewriter
+## Version 4.0 : 2016/11/18
+
 ADD
 - The ability to forward the complete path of the received request to the new destination
   the $1 string is replaced by the complete request.path
@@ -13,15 +12,13 @@ www.toto.com/my/beautyful/song
   into     
 http://toto.cutugnio.it/my/beautyful/song
 
-Version 3.0 :
-------------
+## Version 3.0 :
 Work with nodes LTS
 and some code review 
 But i'm a poor documenter and I cannot remember it.
 
 
-Version 2.0 : 2016/05/15
------------
+## Version 2.0 : 2016/05/15
 CHANGES
  - Change diretory structure
   * ./files : contains url list (can be change in config)
@@ -31,6 +28,7 @@ CHANGES
 
   * ./blacklist contains refused ip list (can be change in config)
  - Change application main file (app.js)
+
 ADD
 - Add config.js file
 - Add ability to read multiple config files for url list 
@@ -39,14 +37,14 @@ ADD
     if not .... Houston we have...
 
 
-Version 1.5
------------
+## Version 1.5
+
 ADD
 - Allow punycode url 
   Because i'm living in a french country, and my user like accents
 
-Version 1.0
------------
+## Version 1.0
+
 This is a simple url rewriter  
 It does only this but it does well.
 
@@ -56,35 +54,37 @@ Be careful, the 2 config files MUST exist before the launch of the program
 If not, the server is crashing 
 
 
-Requirements
+## Requirements
 * Running on linux (we use the grep command)
 * Node js > 0.4.x
 
-Installation 
+##Installation 
 * Git clone ....
 * cd  inthedirectory
 * npm install . ( to install dependencies)
 
+## Running
+* simple 
 
-Running (Linux only)
-simple 
-	nohup node pxy.js >/var/log/pxy.log &
+  nohup node pxy.js >/var/log/pxy.log &
 
-Use PM2 to start the program in cluster mode
+* More stable
+
+  Use PM2 to start the program in cluster mode
   (https://github.com/Unitech/PM2)
   pm2 start pxy.js -i 0 --name rewriter
   don't forget a pm2 startup and a pm2 save..... it can be helpfull when you have a reboot
 
 Personally i protect it with a nginx, but i'm sure you can do without it
 
-Features:
+## Features:
 * You can change the listening port (8080)
 * You can change all messages
 * You can change the (basic) rest Url who's giving the list of rewriting rules
 * IDN name are accepted: have a look in the sample config file
 
 
-Not in:
+## Not in:
 * Statistics
 * Rest CRUD 
 
