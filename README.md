@@ -66,13 +66,13 @@ If not, the server is crashing
 ## Running
 * simple 
 
-  nohup node pxy.js >/var/log/pxy.log &
+  nohup node app.js >/var/log/pxy.log &
 
 * More stable
 
   Use PM2 to start the program in cluster mode
   (https://github.com/Unitech/PM2)
-  pm2 start pxy.js -i 0 --name rewriter
+  pm2 start app.js -i 0 --name rewriter
   don't forget a pm2 startup and a pm2 save..... it can be helpfull when you have a reboot
 
 Personally i protect it with a nginx, but i'm sure you can do without it
