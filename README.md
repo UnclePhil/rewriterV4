@@ -1,4 +1,16 @@
 # Rewriter
+
+## Version 4.1 : 2020/11/24
+ADD 
+- dockerfile construction
+- docker running mode
+- add some structured logging facility
+
+CHANGE
+- default directory for rules and ipblacklist moved  in /src/data  to be used with a docker volume 
+Ex:  -v ./myrewriterdata:/src/data 
+
+
 ## Version 4.0 : 2016/11/18
 
 ADD
@@ -68,14 +80,25 @@ If not, the server is crashing
 
   nohup node app.js >/var/log/pxy.log &
 
-* More stable
+* PM2
 
   Use PM2 to start the program in cluster mode
   (https://github.com/Unitech/PM2)
   pm2 start app.js -i 0 --name rewriter
   don't forget a pm2 startup and a pm2 save..... it can be helpfull when you have a reboot
 
+* Docker
+  The command reflect the default config usage
+  docker run -d  --name rewriter -p 8080:8080 -v ./myrwdata:/src/data unclephil/rewriter  
+
+  variant with another config file
+  docker run -d  --name rewriter -p 8080:8080 -v ./myrwdata:/src/data -v /myrwconfig.js:/src/config.js unclephil/rewriter  
+
+
+
 Personally i protect it with a nginx, but i'm sure you can do without it
+
+
 
 ## Features:
 * You can change the listening port (8080)
@@ -86,7 +109,8 @@ Personally i protect it with a nginx, but i'm sure you can do without it
 
 ## Not in:
 * Statistics
-* Rest CRUD 
+* Rest CRUD
+* Distributed config  
 
 If you have time to work on, please do.
 

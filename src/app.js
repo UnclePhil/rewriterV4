@@ -9,6 +9,15 @@ var http = require('http');
 var fs   = require('fs');
 var idn  = require('punycode');
 var xrl  = require('url');
+var winston = require('winston');
+
+// logger
+var logger = winston.createLogger({
+  defaultMeta: { service: 'rewriter' },
+  transports: [
+    new (winston.transports.Console)({'timestamp':true})
+  ]
+});
 
 //defaultvalue for config
 // TBD
@@ -21,13 +30,16 @@ var config = require('./config.js');
 var configlist = {};
 var iplist    = [];
 
-//watch config files , with this rewriter never stopp working
+//watch config files , with this rewriter never stop working
 // if config files are not present, server is crashing
 //
-fs.watch(config.blacklistfile, function(c,p) { update_iplist(); });
+fs.watch(config.blacklistfile, function(c,p) {
+  logger.info("File "+p+" have been "+c);
+  update_iplist(); 
+ });
 
 fs.watch(config.filespath, { persistent: true }, function (e, f) {
-  console.log("File "+f+" have been "+e);
+  logger.info("File "+f+" have been "+e);
   update_configdir();
 });
 
@@ -47,19 +59,20 @@ var grep = function(what, where, callback){
 
 //read the config directory
 //load all files alphabetically
-//inject data in object {"mysource":"mydestination","mysource2":"mydestination2"}
+// inject data in object {"mysource":"mydestination","mysource2":"mydestination2"}
+// key-value principe : this can be replaced by any KV db
 //
 function update_configdir() {
   configlist={};
-  console.log(config.msg.ConfigLoader);
+  logger.info(config.msg.ConfigLoader);
   fs.readdir(config.filespath,function(err,files){
     if (err) throw err;
     files.sort().forEach(function(file){
-      console.log(config.filespath+file);
+      logger.info(config.filespath+file);
       fs.readFile(config.filespath+file,{encoding: 'utf8'},function(err,data){
 
         if (err) {
-          console.log(config.msg.ErrorReadConfig);
+          logger.http(config.msg.ErrorReadConfig);
           configlist={};
         }
         else {
@@ -78,7 +91,7 @@ function update_configdir() {
                  configlist[e[0]]=e[1];
               }
               else {
-                console.log("Syntax error in ",config.filespath+file, "at line", line);
+                logger.warn("Syntax error in ",config.filespath+file, "at line", line);
               }
             }
           });
@@ -92,7 +105,7 @@ function update_configdir() {
 function update_iplist() {
   fs.readFile(config.blacklistfile,{encoding: 'utf8'},function(err,data){
     if (err) {
-      console.log(config.msg.ErrorReadBlacklist);
+      logger.info(config.msg.ErrorReadBlacklist);
       iplist=[];
     }
     else {
@@ -110,7 +123,7 @@ function deny(response, message, code) {
   response.end();
 }
 
-console.log("Rewriter starting");
+logger.info("Rewriter startup");
 update_configdir();
 update_iplist();
 http.createServer(function(request, response) {
@@ -124,18 +137,18 @@ http.createServer(function(request, response) {
   var host = request.headers['host'] || "";
   var method = request.method;
 
-  console.log(params);
+  logger.http(params);
   // test blacklist ip
   if (iplist.indexOf(ip) >=0) {
     message = ip + ": " +config.msg.IpNotAllowed;
     deny(response, message, "401");
-    console.log(ip + "," + request.method + "," + host+url +",401,IpDenied");
+    logger.warn(ip + "," + request.method + "," + host+url +",401,IpDenied");
     return;
   }
   // reply to config url
   if (url == config.resturl){
-    console.log(ip + "," + request.method + "," + host+url +",200,ShowConfig");
-    console.log(Object.keys(configlist).length+config.msg.ConfigLength);
+    logger.http(ip + "," + request.method + "," + host+url +",200,ShowConfig");
+    logger.http(Object.keys(configlist).length+config.msg.ConfigLength);
     response.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
     response.end(JSON.stringify(configlist, null, 4),'utf-8');
   }
@@ -148,12 +161,12 @@ http.createServer(function(request, response) {
     if (newloc=="" || newloc==null) {
       message = oldloc + " "+config.msg.ErrorHostNotDefined;
       deny(response, message,"404");
-      console.log(ip + "," + request.method + "," + host+url +",404,-");
+      logger.warn(ip + "," + request.method + "," + host+url +",404,-");
     }
     //host in list and rewrited
     else {
-      sloc = newloc.rewrite('$1',url+search);
-      console.log(ip + "," + request.method + "," + host+url +",301,"+sloc);
+      sloc = newloc.replace('$1',url+search);
+      logger.http(ip + "," + request.method + "," + host+url +",301,"+sloc);
       response.writeHead(301,{'Location':idn.toASCII(sloc), 'Expires': (new Date).toGMTString()});
       response.end();
     }
@@ -161,17 +174,17 @@ http.createServer(function(request, response) {
   // info url
   else if (url == config.infourl){
     oldhost = params || "";
-    oldloc = idn.toUnicode(oldhost);
+    oldloc = idn.toUnicode(oldhost); 
     newloc = configlist[oldloc];
     //host not in list
     if (newloc=="" || newloc==null) {
       message = oldloc + " "+config.msg.ErrorHostNotDefined;
       deny(response, message,"404");
-      console.log(ip + "," + request.method + "," + host+url +",404,-");
+      logger.warn(ip + "," + request.method + "," + host+url +",404,-");
     }
     //host in list and rewrited + check duplicate in config file
     else {
-      console.log(ip + "," + request.method + "," + host+url +",200,"+newloc);
+      logger.http(ip + "," + request.method + "," + host+url +",200,"+newloc);
       grep( oldloc, config.filespath, function(list){
         response.writeHead(200);
         response.write("Requested: "+oldloc+"\n");
@@ -195,12 +208,12 @@ http.createServer(function(request, response) {
     if (newloc=="" || newloc==null) {
       message = oldloc + " "+config.msg.ErrorHostNotDefined;
       deny(response, message,"404");
-      console.log(ip + "," + request.method + "," + host+url +",404,-");
+      logger.warn(ip + "," + request.method + "," + host+url +",404,-");
     }
     //host in list and rewrited
     else {
       sloc=newloc.replace('$1',url+search);
-      console.log(ip + "," + request.method + "," + host+url +",301,"+sloc);
+      logger.http(ip + "," + request.method + "," + host+url +",301,"+sloc);
       response.writeHead(301,{'Location':idn.toASCII(sloc), 'Expires': (new Date).toGMTString()});
       response.end();
     }
