@@ -198,7 +198,7 @@ http.createServer(function(request, response) {
   }
 
 
-  //process loaded host
+  //process loaded host and send rewrite response
   else {
     oldhost = host;
 

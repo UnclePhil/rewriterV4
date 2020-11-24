@@ -1,6 +1,28 @@
-# Rewriter
+# Rewriter: A (almost) production ready URL rewriter based on simple CSV file
 
-## Version 4.1 : 2020/11/24
+
+
+## Features:
+* You can change the listening port (8080)
+* You can change all messages
+* You can change the (basic) rest Url who's giving the list of rewriting rules
+* IDN name are accepted: have a look in the sample config file
+
+## Not in:
+* Statistics
+* Rest CRUD
+* Distributed config  
+
+If you have time to work on, please do.
+
+Ph Koenig - aka Unclephil
+http://tc.unclephil.net
+
+
+
+
+## Versions:
+### Version 4.1 : 2020/11/24
 ADD 
 - dockerfile construction
 - docker running mode
@@ -8,10 +30,9 @@ ADD
 
 CHANGE
 - default directory for rules and ipblacklist moved  in /src/data  to be used with a docker volume 
-Ex:  -v ./myrewriterdata:/src/data 
 
 
-## Version 4.0 : 2016/11/18
+### Version 4.0 : 2016/11/18
 
 ADD
 - The ability to forward the complete path of the received request to the new destination
@@ -24,13 +45,13 @@ www.toto.com/my/beautyful/song
   into     
 http://toto.cutugnio.it/my/beautyful/song
 
-## Version 3.0 :
+### Version 3.0 :
 Work with nodes LTS
 and some code review 
 But i'm a poor documenter and I cannot remember it.
 
 
-## Version 2.0 : 2016/05/15
+### Version 2.0 : 2016/05/15
 CHANGES
  - Change diretory structure
   * ./files : contains url list (can be change in config)
@@ -49,13 +70,13 @@ ADD
     if not .... Houston we have...
 
 
-## Version 1.5
+### Version 1.5
 
 ADD
 - Allow punycode url 
   Because i'm living in a french country, and my user like accents
 
-## Version 1.0
+### Version 1.0
 
 This is a simple url rewriter  
 It does only this but it does well.
@@ -68,17 +89,19 @@ If not, the server is crashing
 
 ## Requirements
 * Running on linux (we use the grep command)
-* Node js > 0.4.x
+* Node.js  tested with 15.x due to punycode integration 
 
-##Installation 
+## Installation 
 * Git clone ....
 * cd  inthedirectory
 * npm install . ( to install dependencies)
 
+Or docker build 
+
 ## Running
 * simple 
-
-  nohup node app.js >/var/log/pxy.log &
+>  cd ./src
+>  nohup node app.js >/var/log/pxy.log &
 
 * PM2
 
@@ -87,32 +110,14 @@ If not, the server is crashing
   pm2 start app.js -i 0 --name rewriter
   don't forget a pm2 startup and a pm2 save..... it can be helpfull when you have a reboot
 
+  Personally i protect it with a nginx, but i'm sure you can do without it
+
 * Docker
   The command reflect the default config usage
-  docker run -d  --name rewriter -p 8080:8080 -v ./myrwdata:/src/data unclephil/rewriter  
+  > docker run -d  --name rewriter -p 8080:8080 -v ./myrwdata:/src/data unclephil/rewriter  
 
   variant with another config file
-  docker run -d  --name rewriter -p 8080:8080 -v ./myrwdata:/src/data -v /myrwconfig.js:/src/config.js unclephil/rewriter  
+  > docker run -d  --name rewriter -p 8080:8080 -v ./myrwdata:/src/data -v /myrwconfig.js:/src/config.js unclephil/rewriter  
 
 
 
-Personally i protect it with a nginx, but i'm sure you can do without it
-
-
-
-## Features:
-* You can change the listening port (8080)
-* You can change all messages
-* You can change the (basic) rest Url who's giving the list of rewriting rules
-* IDN name are accepted: have a look in the sample config file
-
-
-## Not in:
-* Statistics
-* Rest CRUD
-* Distributed config  
-
-If you have time to work on, please do.
-
-Ph Koenig - aka Unclephil
-http://tc.unclephil.net
